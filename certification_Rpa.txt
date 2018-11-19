@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+<var-def name="products">  
+		 	<json expression="$.row">     
+				 <xml-to-json>           
+		   			 <datastore name="products2">
+		       			 select * from @this;
+		   			 </datastore>
+		 		</xml-to-json>
+			 </json> 
+		</var-def>                       
+        	
+	<script><![CDATA[ 
+		import groovy.json.JsonSlurper;
+		slurper = new groovy.json.JsonSlurper();
+		data = slurper.parseText(products.toString());
+		println data.discount
+	]]></script>
+	
+<robotics-flow>
+	<robot name= "chromedriver" driver="chrome" close-on-completion="false">
+
+     <script><![CDATA[
+            import java.util.ArrayList;
+            import java.util.concurrent.ThreadLocalRandom;
+ 			driver=chromedriver.getWrappedObject();
+			timeouts(15000) 
+           
+ 			log.info("Abriendo Chrome")
+            open('https://train-invoiceplane.workfusion.com/index.php/sessions/login')
+            Thread.sleep(500);
+            log.info("Chrome abierto")
+            $('#email').val('wf-robot@mail.com')
+            Thread.sleep(500);
+            $('#password').val('BotsRock4ever!')
+            Thread.sleep(500);
+            $(byName('btn_login')).click()
+            Thread.sleep(500);
+            log.info("Iniciada Sesión")
+
+            
+            
+            
+            for (int i=0; i < 3; i++){
+            log.info("Vuelta")
+            $(byXpath('//span[text()="Invoices"]')).click()
+            log.info("Desplegada la pestaña facturas")
+            Thread.sleep(500);
+            log.info('Vamos a crear una factura default')
+      		$(byXpath('//a[@class="create-invoice"]')).click()
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="invoice_group_id"]')).click()
+  			Thread.sleep(500);
+			$(byXpath('//*[@id="invoice_group_id"]/option[2]')).click()
+			Thread.sleep(500);
+  			$(byXpath('//*[@id="invoice_create_confirm"]')).click()
+  			log.info("Creada la invoice")
+  			Thread.sleep(500);
+  			
+  			//Paypal
+  			$(byXpath('//*[@id="payment_method"]')).click();
+			Thread.sleep(500);
+			$(byXpath('//*[@id="payment_method"]/option[2]')).click();
+			
+			// Creamos bucle
+  			
+  			
+  			
+  			if (i==0){
+  			for (int j=0; j<2 ; j++){
+  			index = 2+j;
+  					
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[5]/div/input')).sendKeys(data.discount[j]);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[2]/div/input')).sendKeys(data.title[j]) 
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[3]/div/input')).sendKeys(data.quantity[j])	
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[4]/div/input')).sendKeys(data.price[j])     
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[5]/div/input')).sendKeys(data.discount[j]);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[2]/td[1]/div/textarea')).sendKeys(data.description[j]) 
+  			Thread.sleep(500);
+  			if (j < 1)
+			$(byXpath('//*[@id="invoice_form"]/div/div[3]/div[1]/div/a[1]')).click()
+			if (j==1){
+			/* def idValue = $(byXpath('//*[@id="invoice_number"]')).getAttribute("value");
+	        sys.defineVariable("id", idValue);	
+	        */ 
+	        screen0 = driver().getScreenshotAs(OutputType.BYTES)
+			$(byXpath('//*[@id="btn_save_invoice"]')).click()
+			Thread.sleep(1000)
+			
+			} 
+			}
+			
+			}
+			
+			
+  			if (i==1){
+  			for (int j=2; j<=6 ; j++){
+  			index = j;		
+  			
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[2]/div/input')).sendKeys(data.title[j]) 
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[3]/div/input')).sendKeys(data.quantity[j])	
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[4]/div/input')).sendKeys(data.price[j])     
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[1]/td[5]/div/input')).sendKeys(data.discount[j]);
+  			$(byXpath('//*[@id="item_table"]/tbody[' + index + ']/tr[2]/td[1]/div/textarea')).sendKeys(data.description[j]) 
+  			Thread.sleep(500);
+  			if (j < 6)
+			$(byXpath('//*[@id="invoice_form"]/div/div[3]/div[1]/div/a[1]')).click()
+			if (j==6){
+			/* def idValue = $(byXpath('//*[@id="invoice_number"]')).getAttribute("value");
+	        sys.defineVariable("id", idValue);	
+	        */ 
+	        screen1 = driver().getScreenshotAs(OutputType.BYTES)
+	        $(byXpath('//*[@id="btn_save_invoice"]')).click()
+	        Thread.sleep(500);
+			log.info("Vamos a por la última")
+			driver.navigate().refresh(); 
+			} 
+			}
+			
+			}
+			
+  			if(i==2) {
+  			for (int j=7; j< 8 ; j++){
+  			
+  			$(byXpath('//*[@id="item_table"]/tbody[2]/tr[1]/td[2]/div/input')).sendKeys(data.title[j]) 
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[2]/tr[1]/td[3]/div/input')).sendKeys(data.quantity[j])	
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[2]/tr[1]/td[4]/div/input')).sendKeys(data.price[j])     
+  			Thread.sleep(500);
+  			$(byXpath('//*[@id="item_table"]/tbody[2]/tr[1]/td[5]/div/input')).sendKeys(data.discount[j]);
+  			$(byXpath('//*[@id="item_table"]/tbody[2]/tr[2]/td[1]/div/textarea')).sendKeys(data.description[j]) 
+  			Thread.sleep(500);
+  			/* def idValue = $(byXpath('//*[@id="invoice_number"]')).getAttribute("value");
+	        sys.defineVariable("id", idValue);	
+	        */ 
+	        screen2 = driver().getScreenshotAs(OutputType.BYTES)
+			$(byXpath('//*[@id="btn_save_invoice"]')).click()
+			Thread.sleep(10000)
+			
+			} 
+			}
+				}	
+				
+	  ]]></script>    
+	 
+	 
+<script><![CDATA[ 
+ 		$(byXpath('//span[text()="Invoices"]')).click()
+        log.info("Desplegada la pestaña facturas")
+        Thread.sleep(500);
+        $(byXpath('//*[@id="ip-navbar-collapse"]/ul[1]/li[4]/ul/li[2]/a')).click()
+        Thread.sleep(500);
+		results = new ArrayList();
+	    
+		for (int j=0; j<10; j++){
+		
+		for (int i=0; i < 15; i++){
+		Map record = new HashMap(); 
+		index= i+1;
+		
+		Thread.sleep(500);
+		record.put("status",$(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[1]/span')).getText()) 
+		Thread.sleep(500);
+		
+		record.put("invoice", $(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[2]/a')).getText())
+		Thread.sleep(500);
+		
+		record.put("created", $(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[3]')).getText())
+		Thread.sleep(500);
+		
+		record.put("due_date", $(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[4]')).getText())
+		Thread.sleep(500);
+		
+		record.put("client_name", $(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[5]')).getText())
+		Thread.sleep(500);
+		
+		record.put("amount", $(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[6]')).getText())
+		Thread.sleep(500);
+		
+		record.put("balance", $(byXpath('//*[@id="filter_results"]/div/table/tbody/tr[' + index + ']/td[7]')).getText())
+		Thread.sleep(500);	 
+		
+		results.add(record);
+	}
+		if (j==0){screen3 = driver().getScreenshotAs(OutputType.BYTES)}
+	 	$(byXpath('//*[@id="headerbar"]/div[2]/div/a[3]/i')).click()
+	 }
+	 	println results.status 
+	 	println results.balance
+	 	
+	 	
+		]]></script>
+	 	<script><![CDATA[ 
+	 	import groovy.json.JsonSlurper;
+		slurper = new groovy.json.JsonSlurper();
+		to_xlsx = slurper.parseText(results.toString());
+		]]></script>
+	 
+	   <var-def name="link_url">
+        <s3 bucket="wf-vr-training" endpoint-url="https://s3.amazonaws.com"> 
+            <s3-put path="temp.bucket/wf-vr-training/22832/screen.png" acl="PublicRead" content-type="image/png">
+                <script return="screen0"/>
+            </s3-put>
+        </s3>
+               
+    </var-def>
+          <var-def name="link_url1">
+        <s3 bucket="wf-vr-training" endpoint-url="https://s3.amazonaws.com"> 
+            <s3-put path="temp.bucket/wf-vr-training/22832/screen1.png" acl="PublicRead" content-type="image/png">
+                <script return="screen1"/>
+            </s3-put>
+        </s3>
+             
+    </var-def>  
+          <var-def name="link_url2">
+        <s3 bucket="wf-vr-training" endpoint-url="https://s3.amazonaws.com"> 
+            <s3-put path="temp.bucket/wf-vr-training/22832/screen2.png" acl="PublicRead" content-type="image/png">
+                <script return="screen2"/>
+            </s3-put>
+        </s3>
+    </var-def>  
+    <var-def name="link_url3">
+        <s3 bucket="wf-vr-training" endpoint-url="https://s3.amazonaws.com"> 
+            <s3-put path="temp.bucket/wf-vr-training/22832/screen3.png" acl="PublicRead" content-type="image/png">
+                <script return="screen3"/>
+            </s3-put>
+        </s3>
+    </var-def>   
+ 
+	<var-def name="excel_file">
+	<list-to-excel format="xlsx">
+		<script return= "to_xlsx" />
+	 </list-to-excel>
+	</var-def>	
+	
+	<var-def name="link_xlsx">
+        <s3 bucket="wf-vr-training" endpoint-url="https://s3.amazonaws.com"> 
+            <s3-put path="temp.bucket/wf-vr-training/22832/link_xlsx.xlsx" acl="PublicRead" content-type="application/vnd.ms-excel">
+                <script return="screen3"/>
+            </s3-put>
+        </s3>
+    </var-def>   
+	
+	
+	<export include-original-data="false">
+	<single-column name="Link"><var name="link_url" /></single-column>
+	<single-column name="Link1"><var name="link_url1" /></single-column>
+	<single-column name="Link2"><var name="link_url2" /></single-column>
+	<single-column name="Link_view"><var name="link_url3" /></single-column>
+	<single-column name="link_xlsx"><var name= "link_xlsx"/></single-column>
+	</export> 
+				
+</robot>
+</robotics-flow>
+</config>
